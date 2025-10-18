@@ -3,246 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KOA-D精准风险预警工具</title>
+    <title>KOA-D 风险预警工具原型</title>
+    <!-- 引入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* 确保 Inter 字体，提供优秀的排版 */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f7f9fb;
+            background-color: #f8fafc;
         }
-        /* 移除未使用的滑块样式 */
+        /* 定制卡片基础样式 */
+        .question-card {
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s;
+        }
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 选项样式 */
+        .radio-input {
+            display: none;
+        }
+        .radio-label {
+            padding: 12px 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+            border: 2px solid #cbd5e1;
+            text-align: center;
+            flex-grow: 1;
+            font-size: 15px;
+            background-color: white;
+            color: #475569;
+        }
+        .radio-input:checked + .radio-label {
+            background-color: #3b82f6; /* 选中蓝色 */
+            color: white;
+            border-color: #3b82f6;
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.5);
+        }
+        .radio-label:hover:not(:has(:checked)) {
+            border-color: #60a5fa;
+        }
+
+        /* 结果区域样式 */
+        #resultBox {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
     </style>
 </head>
-<body class="p-4 sm:p-8 min-h-screen flex items-start justify-center">
+<body class="p-4 sm:p-10">
 
-    <div id="app" class="w-full max-w-xl bg-white shadow-2xl rounded-xl p-6 sm:p-8 border border-gray-100">
+    <div id="app" class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-3xl border border-gray-100">
 
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">KOA-D 风险预警工具</h1>
-            <p class="text-gray-500 mt-2 text-sm sm:text-base">基于ML模型关键因子，实现老年骨关节炎患者抑郁风险精准筛查。</p>
-        </header>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-2 border-b-4 pb-3 border-indigo-500/20">
+            KOA-D 精准风险预警工具（原型 v1.0）
+        </h1>
+        <p class="text-gray-500 mb-8 text-base">
+            基于机器学习模型的高权重因子简化评估，用于对骨关节炎（KOA）患者的抑郁共病（KOA-D）风险进行快速分级。
+        </p>
 
-        <!-- Input Form -->
-        <div id="risk-form" class="space-y-6">
+        <div id="questionnaire" class="space-y-8">
 
-            <!-- 1. 慢性疼痛程度 (VAS/NRS) -->
-            <div class="bg-indigo-50 p-4 rounded-lg shadow-inner">
-                <label class="block text-base font-semibold text-indigo-800 mb-3">1. 慢性疼痛程度 (0-10分，VAS/NRS):</label>
-                <div class="space-y-2 text-sm text-indigo-700">
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="painLevel" value="0" class="text-indigo-500">
-                        <span>无疼痛 (0 分)</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="painLevel" value="3" class="text-indigo-500">
-                        <span>轻度疼痛 (1-3 分)</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="painLevel" value="6" checked class="text-indigo-500">
-                        <span>中度疼痛 (4-6 分)</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="painLevel" value="10" class="text-indigo-500">
-                        <span>重度疼痛 (7-10 分)</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- 2. 社会参与度/独居状态 -->
-            <div class="bg-blue-50 p-4 rounded-lg shadow-inner">
-                <label class="block text-base font-semibold text-blue-800 mb-3">2. 社会支持与参与度:</label>
-                <div class="space-y-2 text-sm text-blue-700">
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="socialStatus" value="10" checked class="text-blue-500">
-                        <span>独居，且很少参与社区活动</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="socialStatus" value="5" class="text-blue-500">
-                        <span>与家人同住，但很少参与社区活动</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="socialStatus" value="0" class="text-blue-500">
-                        <span>经常与人交流，每周至少参加一次社区活动</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- 3. 合并慢性病数量（心血管/消化系统） -->
-            <div class="bg-red-50 p-4 rounded-lg shadow-inner">
-                <label class="block text-base font-semibold text-red-800 mb-3">3. 共病数量 (心血管/消化系统):</label>
-                <div class="space-y-2 text-sm text-red-700">
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="comorbidityNum" value="0" class="text-red-500">
-                        <span>0 种</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="comorbidityNum" value="1" checked class="text-red-500">
-                        <span>1 种</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="comorbidityNum" value="2" class="text-red-500">
-                        <span>2 种</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="comorbidityNum" value="3" class="text-red-500">
-                        <span>3 种及以上</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- 4. 低BMI/衰弱风险 -->
-            <div class="bg-green-50 p-4 rounded-lg shadow-inner">
-                <label class="block text-base font-semibold text-green-800 mb-3">4. 低体重/营养风险 (BMI < 18.5):</label>
-                <div class="space-y-2 text-sm text-green-700">
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="lowBmi" value="15" checked class="text-green-500">
-                        <span>体重过轻 (BMI &lt; 18.5) 或近期非主动性体重下降</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" name="lowBmi" value="0" class="text-green-500">
-                        <span>BMI正常或超重 (无体重过轻风险)</span>
-                    </label>
-                </div>
-            </div>
+            <!-- 问题组：5个核心风险因素 -->
             
-            <!-- Calculate Button -->
-            <button onclick="calculateRisk()" 
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 mt-4">
-                立即评估 KOA-D 风险
-            </button>
+            <!-- 1. 慢性疼痛程度 (最高权重临床因素) -->
+            <div class="question-card bg-indigo-50">
+                <label for="pain" class="block text-xl font-bold text-indigo-700 mb-4">
+                    1. 慢性疼痛程度评估
+                </label>
+                <div id="q1_options" class="grid grid-cols-3 gap-4">
+                    <input type="radio" id="pain_0" name="pain" class="radio-input" value="0" data-weight="0" checked>
+                    <label for="pain_0" class="radio-label">轻微/无（VAS 0-3）</label>
+
+                    <input type="radio" id="pain_1" name="pain" class="radio-input" value="1" data-weight="4">
+                    <label for="pain_1" class="radio-label">中度疼痛（VAS 4-7）</label>
+
+                    <input type="radio" id="pain_2" name="pain" class="radio-input" value="2" data-weight="10">
+                    <label for="pain_2" class="radio-label">重度疼痛/严重影响功能（VAS 8-10）</label>
+                </div>
+            </div>
+
+            <!-- 2. 社会参与度/独居状态 (最高权重社会心理因素) -->
+            <div class="question-card bg-blue-50">
+                <label for="social" class="block text-xl font-bold text-blue-700 mb-4">
+                    2. 社会参与度与居住状态评估
+                </label>
+                <div id="q2_options" class="grid grid-cols-2 gap-4">
+                    <input type="radio" id="social_0" name="social" class="radio-input" value="0" data-weight="0" checked>
+                    <label for="social_0" class="radio-label">高参与/非独居（经常社交，与家人同住）</label>
+
+                    <input type="radio" id="social_1" name="social" class="radio-input" value="1" data-weight="9">
+                    <label for="social_1" class="radio-label">低参与/独居/丧偶（少社交，独居或与非直系亲属同住）</label>
+                </div>
+            </div>
+
+            <!-- 3. 低 BMI/衰弱风险 (关键的营养和功能指标) -->
+            <div class="question-card bg-green-50">
+                <label for="frailty" class="block text-xl font-bold text-green-700 mb-4">
+                    3. 体质指数（BMI）与非故意体重减轻
+                </label>
+                <div id="q3_options" class="grid grid-cols-2 gap-4">
+                    <input type="radio" id="frailty_0" name="frailty" class="radio-input" value="0" data-weight="0" checked>
+                    <label for="frailty_0" class="radio-label">BMI正常/超重/肥胖 (≥18.5) 且无非故意减轻</label>
+
+                    <input type="radio" id="frailty_1" name="frailty" class="radio-input" value="1" data-weight="7">
+                    <label for="frailty_1" class="radio-label">BMI过低 (＜18.5) 或近半年有非故意体重减轻</label>
+                </div>
+            </div>
+
+            <!-- 4. 心血管疾病共病 (炎症负担标记) -->
+            <div class="question-card bg-red-50">
+                <label for="cardio" class="block text-xl font-bold text-red-700 mb-4">
+                    4. 是否合并心血管疾病（如高血压、冠心病、卒中）
+                </label>
+                <div id="q4_options" class="grid grid-cols-2 gap-4">
+                    <input type="radio" id="cardio_0" name="cardio" class="radio-input" value="0" data-weight="0" checked>
+                    <label for="cardio_0" class="radio-label">否</label>
+
+                    <input type="radio" id="cardio_1" name="cardio" class="radio-input" value="1" data-weight="8">
+                    <label for="cardio_1" class="radio-label">是（合并心血管疾病）</label>
+                </div>
+            </div>
+
+            <!-- 5. 消化系统疾病共病 (肠-脑轴机制) -->
+            <div class="question-card bg-yellow-50">
+                <label for="digestive" class="block text-xl font-bold text-yellow-700 mb-4">
+                    5. 是否合并消化系统疾病（如胃炎、消化道溃疡、肠易激）
+                </label>
+                <div id="q5_options" class="grid grid-cols-2 gap-4">
+                    <input type="radio" id="digestive_0" name="digestive" class="radio-input" value="0" data-weight="0" checked>
+                    <label for="digestive_0" class="radio-label">否</label>
+
+                    <input type="radio" id="digestive_1" name="digestive" class="radio-input" value="1" data-weight="6">
+                    <label for="digestive_1" class="radio-label">是（合并消化系统疾病）</label>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Result Display -->
-        <div id="resultBox" class="mt-8 hidden p-6 border-4 rounded-xl transition duration-500">
-            <h2 class="text-xl font-bold mb-2 flex items-center space-x-2">
-                <svg id="resultIcon" class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-7-9a1 1 0 011-1h10a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                <span id="riskLevel"></span>
-            </h2>
-            <p id="riskScoreDisplay" class="text-sm font-medium mb-4"></p>
-            <p id="riskGuidance" class="text-base leading-relaxed"></p>
+        <button id="calculateBtn" class="w-full mt-10 py-4 bg-indigo-600 text-white font-extrabold text-xl rounded-xl shadow-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-[1.005] hover:shadow-2xl">
+            点击评估风险等级
+        </button>
+
+        <!-- 结果展示区域 -->
+        <div id="resultBox" class="mt-10 p-8 rounded-2xl shadow-xl border-t-4 hidden" style="border-color: #3b82f6;">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">评估结果与干预建议</h2>
+            
+            <div id="riskLevel" class="text-3xl font-extrabold mb-3"></div>
+            <div id="riskScore" class="text-xl font-semibold mb-4 text-gray-600"></div>
+            
+            <p id="recommendation" class="text-gray-700 leading-relaxed text-lg"></p>
         </div>
 
-        <!-- Developer Attribution Footer -->
-        <footer class="mt-8 pt-4 border-t border-gray-200 text-center text-xs text-gray-400">
-            <p>原型开发与实现：谢娟（安徽建筑大学）, 李海龙（阜阳市第二人民医院）, 李春（合肥市第一人民医院）</p>
-            <p class="mt-1">基于 CHARLS 数据和 GBDT-SHAP 风险因子识别技术</p>
-        </footer>
+        <p class="text-center text-sm text-gray-400 mt-10 pt-4 border-t border-gray-100">
+            开发人员信息：谢娟（安徽建筑大学），李海龙（阜阳市第二人民医院），李春（合肥市第一人民医院） | 原型工具，非临床诊断用途
+        </p>
 
     </div>
 
     <script>
-        // 风险评分的权重和阈值 (模拟ML模型发现的关键因子权重)
-        // 总分范围: 0 (最低风险) 到 80 (最高风险)
-        const WEIGHTS = {
-            pain: 4,      // 疼痛 (0-10分，权重最高)
-            social: 1,    // 社会支持 (权重中等)
-            comorbidity: 5, // 共病数量 (0-3种, 权重高)
-            lowBmi: 1,    // 低BMI/衰弱 (二元变量, 权重中等)
-        };
-
-        const THRESHOLDS = {
-            low: 30,      // 低风险: Score < 30
-            medium: 60,   // 中风险: 30 <= Score < 60
-            high: 1000,   // 高风险: Score >= 60
-        };
-        
-        // 独居/低参与度 的分数映射（与单选框的 value 对应）
-        // 0分: 参与高; 5分: 参与中等; 10分: 参与低/独居
-        
-        // 低BMI/衰弱 的分数映射（与单选框的 value 对应）
-        // 0分: 正常; 15分: 过轻/衰弱风险
-
-        function calculateRisk() {
-            // 1. 获取输入值 (已更新为从 radio buttons 获取值)
-            const painElement = document.querySelector('input[name="painLevel"]:checked');
-            const socialElement = document.querySelector('input[name="socialStatus"]:checked');
-            const comorbidityElement = document.querySelector('input[name="comorbidityNum"]:checked');
-            const bmiElement = document.querySelector('input[name="lowBmi"]:checked');
-
-            // 检查是否有未选择的项
-            if (!painElement || !socialElement || !comorbidityElement || !bmiElement) {
-                // 使用自定义的 message box 替代 alert()
-                showTemporaryMessage("请确保所有风险因素都已选择。", "bg-red-200 border-red-500 text-red-800");
-                return; 
-            }
-
-            const painScore = parseInt(painElement.value);
-            const socialStatusScore = parseInt(socialElement.value);
-            const comorbidityCount = parseInt(comorbidityElement.value);
-            const lowBmiScore = parseInt(bmiElement.value);
-
-            // 2. 风险计算 (基于简化的加权总分模型)
-            // 慢性疼痛 (0-40分, 疼痛值 x 4)
-            const painRisk = painScore * WEIGHTS.pain;
-            
-            // 社会隔离 (0-10分)
-            const socialRisk = socialStatusScore; 
-            
-            // 共病风险 (0-15分, 共病数 x 5)
-            const comorbidityRisk = comorbidityCount * WEIGHTS.comorbidity; 
-            
-            // 低BMI/衰弱风险 (0-15分)
-            const bmiRisk = lowBmiScore; 
-
-            // 总风险分数 (理论最大值: 40 + 10 + 15 + 15 = 80)
-            const totalScore = painRisk + socialRisk + comorbidityRisk + bmiRisk;
-
-            // 3. 确定风险等级和建议
-            let level, color, guidance, iconPath;
-
-            if (totalScore >= THRESHOLDS.medium) {
-                level = "高风险 (需立即转介)";
-                color = "border-red-500 bg-red-50";
-                guidance = "您的风险评分表明共病抑郁风险较高。请立即联系您的家庭医生或基层医疗机构，并强烈建议转介至**多学科协作(MDT)门诊**或精神卫生中心进行进一步评估和整合干预。";
-                iconPath = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>';
-            } else if (totalScore >= THRESHOLDS.low) {
-                level = "中风险 (建议重点关注)";
-                color = "border-amber-500 bg-amber-50";
-                guidance = "您的风险评分处于中等水平。建议基层医生将您纳入**重点管理人群**。请加强**社区参与**（如KOA互助小组），并定期接受疼痛管理和基础心理健康教育。";
-                iconPath = '<path fill-rule="evenodd" d="M8.257 3.34A1 1 0 007 4.25v11.5a1 1 0 001.257.91l6.45-3.226a1 1 0 000-1.788L8.257 3.34zM10 18a8 8 0 100-16 8 8 0 000 16z" clip-rule="evenodd"></path>';
-            } else {
-                level = "低风险 (常规管理)";
-                color = "border-green-500 bg-green-50";
-                guidance = "您的风险评分较低。请继续保持积极的社会参与和规律的康复运动。基层医疗机构将对您进行**常规慢病管理**和健康指导。";
-                iconPath = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>';
-            }
-
-            // 4. 更新UI显示结果
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const questionnaire = document.getElementById('questionnaire');
             const resultBox = document.getElementById('resultBox');
-            resultBox.className = `mt-8 p-6 border-4 rounded-xl transition duration-500 ${color}`;
-            resultBox.classList.remove('hidden');
+            const riskScoreDisplay = document.getElementById('riskScore');
+            const riskLevelDisplay = document.getElementById('riskLevel');
+            const recommendationDisplay = document.getElementById('recommendation');
 
-            document.getElementById('riskLevel').textContent = level;
-            document.getElementById('riskScoreDisplay').textContent = `综合风险评分: ${totalScore} 分 (满分 80 分)`;
-            document.getElementById('riskGuidance').textContent = guidance;
-            document.getElementById('resultIcon').innerHTML = iconPath;
-        }
+            // 风险等级阈值 (总分范围：0 到 10 + 9 + 7 + 8 + 6 = 40)
+            const MAX_SCORE = 40;
+            const THRESHOLDS = {
+                LOW: 15,       // 低风险到中风险的临界点
+                MEDIUM: 25,    // 中风险到高风险的临界点
+            };
 
-        // 自定义消息框函数 (替代 alert/confirm)
-        function showTemporaryMessage(message, className) {
-            let msgBox = document.getElementById('tempMessageBox');
-            if (!msgBox) {
-                msgBox = document.createElement('div');
-                msgBox.id = 'tempMessageBox';
-                msgBox.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-xl z-50 text-center font-semibold transition-opacity duration-300 opacity-0';
-                document.body.appendChild(msgBox);
-            }
-            msgBox.textContent = message;
-            msgBox.className = `fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-xl z-50 text-center font-semibold transition-opacity duration-300 ${className}`;
-            msgBox.style.opacity = '1';
+            calculateBtn.addEventListener('click', () => {
+                let totalScore = 0;
 
-            setTimeout(() => {
-                msgBox.style.opacity = '0';
-            }, 3000);
-        }
+                // 遍历所有问题组，计算总分
+                const questionGroups = ['pain', 'social', 'frailty', 'cardio', 'digestive'];
+                
+                questionGroups.forEach(groupName => {
+                    const selected = questionnaire.querySelector(`input[name="${groupName}"]:checked`);
+                    if (selected) {
+                        const weight = parseInt(selected.getAttribute('data-weight') || 0);
+                        totalScore += weight;
+                    }
+                });
 
-        window.onload = function() {
-            // No initialization needed here.
-        };
+                // 确定风险等级、颜色和建议
+                let level, color, recommendationText, borderColor;
+
+                if (totalScore >= THRESHOLDS.MEDIUM) {
+                    level = '高风险 (High Risk)';
+                    color = 'text-red-600';
+                    borderColor = '#dc2626'; // Red-600
+                    recommendationText = `**极高风险**。该患者应被视为 KOA-D 高危人群。**建议立即转诊**至医联体或上级医院的**多学科协作（MDT）门诊**，进行疼痛科、康复科、心理科的联合评估与整合干预。`;
+                } else if (totalScore >= THRESHOLDS.LOW) {
+                    level = '中风险 (Medium Risk)';
+                    color = 'text-yellow-600';
+                    borderColor = '#f59e0b'; // Yellow-600
+                    recommendationText = `**中度风险**。该患者应纳入基层医疗机构的 KOA **重点管理对象**。建议加强社区社工的**社会支持干预**和**个性化运动康复指导**，并定期（每季度）使用专业量表评估抑郁症状。`;
+                } else {
+                    level = '低风险 (Low Risk)';
+                    color = 'text-green-600';
+                    borderColor = '#10b981'; // Green-600
+                    recommendationText = `**低风险**。可维持常规的 KOA 慢病管理。建议进行健康教育，指导患者保持积极的社交和体力活动，并监测疼痛或共病状态，以进行早期干预。`;
+                }
+
+                // 更新结果展示
+                riskScoreDisplay.textContent = `总风险权重分：${totalScore} / ${MAX_SCORE}`;
+                riskLevelDisplay.className = `text-3xl font-extrabold mb-3 ${color}`;
+                riskLevelDisplay.textContent = `风险等级：${level}`;
+                recommendationDisplay.innerHTML = recommendationText;
+                
+                // 显示结果区域并设置颜色
+                resultBox.style.borderColor = borderColor;
+                resultBox.classList.remove('hidden');
+                setTimeout(() => { resultBox.style.opacity = 1; }, 10); // 确保动画生效
+                
+                // 滚动到结果区域
+                resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
     </script>
 </body>
 </html>
-
- 
